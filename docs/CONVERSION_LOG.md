@@ -43,3 +43,12 @@
 - command.rs: +25 variants, dispatch_lidarr/dispatch_readarr, shared resolve_service_config helper, per-service auto-routing, explicit-Demo tests. Exhaustive match caught missing cross-arms (E0004) - fixed same way.
 - Gates: clippy -D warnings green, cargo test 26 passed (18 + 3 + 3 + 2), fmt green.
 - Next: Phase 2e bazarr.rs + prowlarr.rs + overseerr.rs, then Phase 3 L2 mcp stdio (cross/health compose there).
+
+## 2026-10-18 - Phase 2e: bazarr.rs + prowlarr.rs + overseerr.rs (38 tests green)
+
+- bazarr.rs (/api): wanted (movies/episodes/all), search, download, history, providers, languages. 6 ops, 3 offline tests. Subtitle search/download shapes reconstructed - pending live verify.
+- prowlarr.rs (/api/v1): indexers 8 (incl. test/testall/schema), unified search, applications 5, history 3. 17 ops, 3 offline tests. App sync/test + history-since/by-indexer shapes reconstructed - pending live verify.
+- overseerr.rs (/api/v1 absolute): requests 8 (incl. approve/decline/count/pending), search, users 3. 12 ops, 3 offline tests. Create payload reconstructed - pending live verify.
+- command.rs: 80 variants total (Status + 11+8+10+15+6+17+12), dispatch_bazarr/prowlarr/overseerr, resolvers, routing, explicit-Demo tests. All 7 drivers wired.
+- Gates: clippy -D warnings green, cargo test 38 passed (26 + 12), fmt green.
+- Next: Phase 3 L2 mcp stdio (cross/health/help compose over the bus, dual aliases, id_to_key, byte-exact probe).

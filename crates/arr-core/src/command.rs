@@ -5,9 +5,12 @@
 
 use serde_json::Value;
 
+use crate::bazarr::BazarrClient;
 use crate::error::ArrError;
 use crate::import::{discover_legacy_dir, load_from_dir, ArrServices};
 use crate::lidarr::LidarrClient;
+use crate::overseerr::OverseerrClient;
+use crate::prowlarr::ProwlarrClient;
 use crate::radarr::RadarrClient;
 use crate::readarr::ReadarrClient;
 use crate::sonarr::SonarrClient;
@@ -178,6 +181,90 @@ pub enum Command {
         delete_files: bool,
     },
     ReadarrAddOptions,
+    BazarrWanted {
+        kind: String,
+    },
+    BazarrSearch {
+        series_id: Option<i64>,
+        episode_id: Option<i64>,
+        movie_id: Option<i64>,
+    },
+    BazarrDownload {
+        subtitle_id: String,
+    },
+    BazarrHistory,
+    BazarrProviders,
+    BazarrLanguages,
+    ProwlarrIndexersList,
+    ProwlarrIndexerGet {
+        indexer_id: i64,
+    },
+    ProwlarrIndexerAdd {
+        fields: serde_json::Value,
+    },
+    ProwlarrIndexerUpdate {
+        indexer_id: i64,
+        fields: serde_json::Value,
+    },
+    ProwlarrIndexerDelete {
+        indexer_id: i64,
+    },
+    ProwlarrIndexerTest {
+        indexer_id: i64,
+    },
+    ProwlarrIndexersTestAll,
+    ProwlarrIndexerSchema,
+    ProwlarrSearch {
+        query: String,
+    },
+    ProwlarrApplicationsList,
+    ProwlarrApplicationGet {
+        app_id: i64,
+    },
+    ProwlarrApplicationSync {
+        app_id: i64,
+    },
+    ProwlarrApplicationsSyncAll,
+    ProwlarrApplicationTest {
+        app_id: i64,
+    },
+    ProwlarrHistoryList,
+    ProwlarrHistorySince {
+        since: String,
+    },
+    ProwlarrHistoryByIndexer {
+        indexer_id: i64,
+    },
+    OverseerrRequestsList,
+    OverseerrRequestGet {
+        request_id: i64,
+    },
+    OverseerrRequestCreate {
+        media_type: String,
+        media_id: i64,
+        seasons: Vec<i64>,
+    },
+    OverseerrRequestApprove {
+        request_id: i64,
+    },
+    OverseerrRequestDecline {
+        request_id: i64,
+    },
+    OverseerrRequestDelete {
+        request_id: i64,
+    },
+    OverseerrRequestsCount,
+    OverseerrRequestsPending,
+    OverseerrSearch {
+        query: String,
+    },
+    OverseerrUsersList,
+    OverseerrUserGet {
+        user_id: i64,
+    },
+    OverseerrUserRequests {
+        user_id: i64,
+    },
 }
 
 /// Run one command against an explicit Sonarr client.
@@ -280,6 +367,47 @@ pub async fn dispatch(client: &SonarrClient, command: &Command) -> Result<Value,
         | Command::ReadarrBooksDeleteMany { .. }
         | Command::ReadarrAddOptions => Err(ArrError::Unsupported(
             "readarr command requires a Readarr client: use dispatch_readarr".to_string(),
+        )),
+        Command::BazarrWanted { .. }
+        | Command::BazarrSearch { .. }
+        | Command::BazarrDownload { .. }
+        | Command::BazarrHistory
+        | Command::BazarrProviders
+        | Command::BazarrLanguages => Err(ArrError::Unsupported(
+            "bazarr command requires a Bazarr client: use dispatch_bazarr".to_string(),
+        )),
+        Command::ProwlarrIndexersList
+        | Command::ProwlarrIndexerGet { .. }
+        | Command::ProwlarrIndexerAdd { .. }
+        | Command::ProwlarrIndexerUpdate { .. }
+        | Command::ProwlarrIndexerDelete { .. }
+        | Command::ProwlarrIndexerTest { .. }
+        | Command::ProwlarrIndexersTestAll
+        | Command::ProwlarrIndexerSchema
+        | Command::ProwlarrSearch { .. }
+        | Command::ProwlarrApplicationsList
+        | Command::ProwlarrApplicationGet { .. }
+        | Command::ProwlarrApplicationSync { .. }
+        | Command::ProwlarrApplicationsSyncAll
+        | Command::ProwlarrApplicationTest { .. }
+        | Command::ProwlarrHistoryList
+        | Command::ProwlarrHistorySince { .. }
+        | Command::ProwlarrHistoryByIndexer { .. } => Err(ArrError::Unsupported(
+            "prowlarr command requires a Prowlarr client: use dispatch_prowlarr".to_string(),
+        )),
+        Command::OverseerrRequestsList
+        | Command::OverseerrRequestGet { .. }
+        | Command::OverseerrRequestCreate { .. }
+        | Command::OverseerrRequestApprove { .. }
+        | Command::OverseerrRequestDecline { .. }
+        | Command::OverseerrRequestDelete { .. }
+        | Command::OverseerrRequestsCount
+        | Command::OverseerrRequestsPending
+        | Command::OverseerrSearch { .. }
+        | Command::OverseerrUsersList
+        | Command::OverseerrUserGet { .. }
+        | Command::OverseerrUserRequests { .. } => Err(ArrError::Unsupported(
+            "overseerr command requires an Overseerr client: use dispatch_overseerr".to_string(),
         )),
     }
 }
@@ -458,6 +586,105 @@ pub async fn dispatch_readarr(
     }
 }
 
+/// Run one command against an explicit Bazarr client.
+pub async fn dispatch_bazarr(client: &BazarrClient, command: &Command) -> Result<Value, ArrError> {
+    match command {
+        Command::Status => Ok(serde_json::json!({
+            "service": "rust-arr-mcp",
+            "phase": "phase-2e-bazarr-prowlarr-overseerr",
+            "ok": true,
+        })),
+        Command::BazarrWanted { kind } => client.wanted(kind).await,
+        Command::BazarrSearch {
+            series_id,
+            episode_id,
+            movie_id,
+        } => client.search(*series_id, *episode_id, *movie_id).await,
+        Command::BazarrDownload { subtitle_id } => client.download(subtitle_id).await,
+        Command::BazarrHistory => client.history().await,
+        Command::BazarrProviders => client.providers().await,
+        Command::BazarrLanguages => client.languages().await,
+        _ => Err(ArrError::Unsupported(
+            "non-bazarr command requires its own client".to_string(),
+        )),
+    }
+}
+
+/// Run one command against an explicit Prowlarr client.
+pub async fn dispatch_prowlarr(
+    client: &ProwlarrClient,
+    command: &Command,
+) -> Result<Value, ArrError> {
+    match command {
+        Command::Status => Ok(serde_json::json!({
+            "service": "rust-arr-mcp",
+            "phase": "phase-2e-bazarr-prowlarr-overseerr",
+            "ok": true,
+        })),
+        Command::ProwlarrIndexersList => client.indexers_list().await,
+        Command::ProwlarrIndexerGet { indexer_id } => client.indexer_get(*indexer_id).await,
+        Command::ProwlarrIndexerAdd { fields } => client.indexer_add(fields.clone()).await,
+        Command::ProwlarrIndexerUpdate { indexer_id, fields } => {
+            client.indexer_update(*indexer_id, fields.clone()).await
+        }
+        Command::ProwlarrIndexerDelete { indexer_id } => client.indexer_delete(*indexer_id).await,
+        Command::ProwlarrIndexerTest { indexer_id } => client.indexer_test(*indexer_id).await,
+        Command::ProwlarrIndexersTestAll => client.indexers_test_all().await,
+        Command::ProwlarrIndexerSchema => client.indexer_schema().await,
+        Command::ProwlarrSearch { query } => client.search(query).await,
+        Command::ProwlarrApplicationsList => client.applications_list().await,
+        Command::ProwlarrApplicationGet { app_id } => client.application_get(*app_id).await,
+        Command::ProwlarrApplicationSync { app_id } => client.application_sync(*app_id).await,
+        Command::ProwlarrApplicationsSyncAll => client.applications_sync_all().await,
+        Command::ProwlarrApplicationTest { app_id } => client.application_test(*app_id).await,
+        Command::ProwlarrHistoryList => client.history_list().await,
+        Command::ProwlarrHistorySince { since } => client.history_since(since).await,
+        Command::ProwlarrHistoryByIndexer { indexer_id } => {
+            client.history_by_indexer(*indexer_id).await
+        }
+        _ => Err(ArrError::Unsupported(
+            "non-prowlarr command requires its own client".to_string(),
+        )),
+    }
+}
+
+/// Run one command against an explicit Overseerr client.
+pub async fn dispatch_overseerr(
+    client: &OverseerrClient,
+    command: &Command,
+) -> Result<Value, ArrError> {
+    match command {
+        Command::Status => Ok(serde_json::json!({
+            "service": "rust-arr-mcp",
+            "phase": "phase-2e-bazarr-prowlarr-overseerr",
+            "ok": true,
+        })),
+        Command::OverseerrRequestsList => client.requests_list().await,
+        Command::OverseerrRequestGet { request_id } => client.request_get(*request_id).await,
+        Command::OverseerrRequestCreate {
+            media_type,
+            media_id,
+            seasons,
+        } => client.request_create(media_type, *media_id, seasons).await,
+        Command::OverseerrRequestApprove { request_id } => {
+            client.request_approve(*request_id).await
+        }
+        Command::OverseerrRequestDecline { request_id } => {
+            client.request_decline(*request_id).await
+        }
+        Command::OverseerrRequestDelete { request_id } => client.request_delete(*request_id).await,
+        Command::OverseerrRequestsCount => client.requests_count().await,
+        Command::OverseerrRequestsPending => client.requests_pending().await,
+        Command::OverseerrSearch { query } => client.search(query).await,
+        Command::OverseerrUsersList => client.users_list().await,
+        Command::OverseerrUserGet { user_id } => client.user_get(*user_id).await,
+        Command::OverseerrUserRequests { user_id } => client.user_requests(*user_id).await,
+        _ => Err(ArrError::Unsupported(
+            "non-overseerr command requires its own client".to_string(),
+        )),
+    }
+}
+
 /// Resolve the right service (process env → imported legacy checkout → Demo)
 /// from the command variant and run it. Never panics.
 pub async fn dispatch_auto(command: Command) -> Result<Value, ArrError> {
@@ -503,6 +730,50 @@ pub async fn dispatch_auto(command: Command) -> Result<Value, ArrError> {
         | Command::ReadarrAddOptions => {
             let client = resolve_readarr_client();
             dispatch_readarr(&client, &command).await
+        }
+        Command::BazarrWanted { .. }
+        | Command::BazarrSearch { .. }
+        | Command::BazarrDownload { .. }
+        | Command::BazarrHistory
+        | Command::BazarrProviders
+        | Command::BazarrLanguages => {
+            let client = resolve_bazarr_client();
+            dispatch_bazarr(&client, &command).await
+        }
+        Command::ProwlarrIndexersList
+        | Command::ProwlarrIndexerGet { .. }
+        | Command::ProwlarrIndexerAdd { .. }
+        | Command::ProwlarrIndexerUpdate { .. }
+        | Command::ProwlarrIndexerDelete { .. }
+        | Command::ProwlarrIndexerTest { .. }
+        | Command::ProwlarrIndexersTestAll
+        | Command::ProwlarrIndexerSchema
+        | Command::ProwlarrSearch { .. }
+        | Command::ProwlarrApplicationsList
+        | Command::ProwlarrApplicationGet { .. }
+        | Command::ProwlarrApplicationSync { .. }
+        | Command::ProwlarrApplicationsSyncAll
+        | Command::ProwlarrApplicationTest { .. }
+        | Command::ProwlarrHistoryList
+        | Command::ProwlarrHistorySince { .. }
+        | Command::ProwlarrHistoryByIndexer { .. } => {
+            let client = resolve_prowlarr_client();
+            dispatch_prowlarr(&client, &command).await
+        }
+        Command::OverseerrRequestsList
+        | Command::OverseerrRequestGet { .. }
+        | Command::OverseerrRequestCreate { .. }
+        | Command::OverseerrRequestApprove { .. }
+        | Command::OverseerrRequestDecline { .. }
+        | Command::OverseerrRequestDelete { .. }
+        | Command::OverseerrRequestsCount
+        | Command::OverseerrRequestsPending
+        | Command::OverseerrSearch { .. }
+        | Command::OverseerrUsersList
+        | Command::OverseerrUserGet { .. }
+        | Command::OverseerrUserRequests { .. } => {
+            let client = resolve_overseerr_client();
+            dispatch_overseerr(&client, &command).await
         }
         _ => {
             let client = resolve_sonarr_client();
@@ -610,6 +881,33 @@ fn resolve_readarr_client() -> ReadarrClient {
     ReadarrClient::demo()
 }
 
+fn resolve_bazarr_client() -> BazarrClient {
+    if let Some((url, key)) = resolve_service_config("bazarr") {
+        if let Ok(client) = BazarrClient::new(&url, &key) {
+            return client;
+        }
+    }
+    BazarrClient::demo()
+}
+
+fn resolve_prowlarr_client() -> ProwlarrClient {
+    if let Some((url, key)) = resolve_service_config("prowlarr") {
+        if let Ok(client) = ProwlarrClient::new(&url, &key) {
+            return client;
+        }
+    }
+    ProwlarrClient::demo()
+}
+
+fn resolve_overseerr_client() -> OverseerrClient {
+    if let Some((url, key)) = resolve_service_config("overseerr") {
+        if let Ok(client) = OverseerrClient::new(&url, &key) {
+            return client;
+        }
+    }
+    OverseerrClient::demo()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -661,6 +959,36 @@ mod tests {
         use crate::readarr::ReadarrClient;
         let client = ReadarrClient::demo();
         let v = dispatch_readarr(&client, &Command::ReadarrAuthorsList)
+            .await
+            .unwrap_or(Value::Null);
+        assert_eq!(v.as_array().map(Vec::len), Some(2));
+    }
+
+    #[tokio::test]
+    async fn demo_bazarr_explicit() {
+        use crate::bazarr::BazarrClient;
+        let client = BazarrClient::demo();
+        let v = dispatch_bazarr(&client, &Command::BazarrProviders)
+            .await
+            .unwrap_or(Value::Null);
+        assert_eq!(v.as_array().map(Vec::len), Some(2));
+    }
+
+    #[tokio::test]
+    async fn demo_prowlarr_explicit() {
+        use crate::prowlarr::ProwlarrClient;
+        let client = ProwlarrClient::demo();
+        let v = dispatch_prowlarr(&client, &Command::ProwlarrIndexersList)
+            .await
+            .unwrap_or(Value::Null);
+        assert_eq!(v.as_array().map(Vec::len), Some(2));
+    }
+
+    #[tokio::test]
+    async fn demo_overseerr_explicit() {
+        use crate::overseerr::OverseerrClient;
+        let client = OverseerrClient::demo();
+        let v = dispatch_overseerr(&client, &Command::OverseerrRequestsList)
             .await
             .unwrap_or(Value::Null);
         assert_eq!(v.as_array().map(Vec::len), Some(2));
