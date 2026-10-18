@@ -52,3 +52,12 @@
 - command.rs: 80 variants total (Status + 11+8+10+15+6+17+12), dispatch_bazarr/prowlarr/overseerr, resolvers, routing, explicit-Demo tests. All 7 drivers wired.
 - Gates: clippy -D warnings green, cargo test 38 passed (26 + 12), fmt green.
 - Next: Phase 3 L2 mcp stdio (cross/health/help compose over the bus, dual aliases, id_to_key, byte-exact probe).
+
+## 2026-10-18 - Phase 3: L2 CLI + dual-aliased MCP stdio (43 tests green)
+
+- main.rs (~1400 lines): per-service CLI subs (typed --op enums + --params-json + --base-url/--api-key, --json everywhere; documented deviation from 80 one-shot subs), panic hook (crash.log, caught a real clap help-collision in-probe), 82-tool catalog, 3-form aliases (dot + underscore + legacy portmanteau w/ explicit op table; orchestration-layer legacy tools get a clear not-yet-ported error, not silent misroute), run_mcp_stdio mirror (verbatim id echo incl. string IDs, -32700/-32601, notifications skip, isError content).
+- Health split (documented): MCP arr.health = config presence (no network on stdio); CLI --probe does one bounded read per service. arr.help = inventory. orchestrate/calendar/stats/agentic/prefab deferred (need unported endpoints).
+- Probe (byte-exact, live): initialize/tools-list(82)/help/legacy-list(-32601/-32700, notifications skipped). Legacy sonarr_series list hit LIVE Sonarr -> [] (auth OK, empty library). String-ID echo verified.
+- Contract tests (5): catalog-82, unknown->err-not-panic, legacy-alias-equality (env-proof), round-trip, write-safety rejects.
+- Gates: clippy -D warnings green, cargo test 43 passed (38 + 5), fmt green.
+- Next: Phase 4 L3 egui dashboard (18 pages) or CHANGELOG + release v0.1.0.
