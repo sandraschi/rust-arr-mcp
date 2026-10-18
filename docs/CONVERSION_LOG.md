@@ -35,3 +35,11 @@
 - Gates: clippy `-D warnings` green, `cargo test` 18 passed (13 prior + 4 radarr + 1 command), fmt green.
 - Also filed `mcp-central-docs/research/FLEET_MCP_OBSERVABILITY.md` (interceptor belongs in fleet lane, not in-repo).
 - Next: Phase 2d `lidarr.rs` + `readarr.rs`, or Phase 3 L2 `mcp` stdio — your call.
+
+## 2026-10-18 - Phase 2d: lidarr.rs + readarr.rs (26 tests green)
+
+- lidarr.rs (/api/v1): artists list/lookup/get/add/delete/update (foreignArtistId) + albums list/get/lookup/set_monitored (GET+PUT). Demo fixtures, 3 offline tests.
+- readarr.rs (/api/v1): authors 6 + books list/get/lookup/search/set_monitored (BookSearch reconstructed Servarr shape, flagged for live verify) + mutations add/delete/delete_many + add_options (4 GETs aggregated). Demo fixtures, 3 offline tests.
+- command.rs: +25 variants, dispatch_lidarr/dispatch_readarr, shared resolve_service_config helper, per-service auto-routing, explicit-Demo tests. Exhaustive match caught missing cross-arms (E0004) - fixed same way.
+- Gates: clippy -D warnings green, cargo test 26 passed (18 + 3 + 3 + 2), fmt green.
+- Next: Phase 2e bazarr.rs + prowlarr.rs + overseerr.rs, then Phase 3 L2 mcp stdio (cross/health compose there).
