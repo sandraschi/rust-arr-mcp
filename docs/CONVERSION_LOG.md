@@ -27,3 +27,11 @@
 - Live oracle (accidental, read-only): Goliath Sonarr reachable at `localhost:8989` with real key from `arr-services.json` — `series_list` returned `[]` (auth OK, empty library). Pinned `command.rs` tests to explicit Demo clients afterward (deterministic CI).
 - Gates: clippy `-D warnings` green, `cargo test` 13 passed (6 sonarr + 4 import + 3 command), fmt green.
 - Next: Phase 2c `radarr.rs` (8 ops, same pattern) or L2 `mcp` stdio (Phase 3) — your call.
+
+## 2026-10-18 — Phase 2c: `radarr.rs` driver (18 tests green)
+
+- `radarr.rs`: `/api/v3` + `X-Api-Key` + 30 s + 32 MiB; list/lookup/get/add/search/delete/update/import (`MoviesSearch` + `movieIds`, import via `/manualimport`), same guards as sonarr. Demo fixtures, 4 offline tests.
+- `command.rs`: 8 `Radarr*` variants + `dispatch_radarr` + per-service `dispatch_auto` routing (radarr vs sonarr) + `resolve_radarr_client` (`RADARR_URL/API_KEY` → imported → Demo). `id_to_key` lesson from Gemini interceptor doc recorded for Phase 3 (accept num-or-string IDs).
+- Gates: clippy `-D warnings` green, `cargo test` 18 passed (13 prior + 4 radarr + 1 command), fmt green.
+- Also filed `mcp-central-docs/research/FLEET_MCP_OBSERVABILITY.md` (interceptor belongs in fleet lane, not in-repo).
+- Next: Phase 2d `lidarr.rs` + `readarr.rs`, or Phase 3 L2 `mcp` stdio — your call.
