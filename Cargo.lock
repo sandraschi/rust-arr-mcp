@@ -301,6 +301,7 @@ dependencies = [
  "eframe",
  "egui_kittest",
  "keyring",
+ "reqwest",
  "serde",
  "serde_json",
  "tokio",
