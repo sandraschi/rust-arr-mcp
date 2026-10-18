@@ -1,0 +1,24 @@
+[package]
+name = "arr-app"
+version = "0.1.0"
+edition = "2021"
+description = "L3 egui desktop dashboard calling arr-core in-process (ArtCraft native stack)"
+license = "MIT OR Apache-2.0"
+
+[[bin]]
+name = "arr-app"
+path = "src/main.rs"
+
+[dependencies]
+arr-core = { path = "../arr-core" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tokio = { workspace = true }
+eframe = { workspace = true }
+keyring = { workspace = true }
+
+[dev-dependencies]
+egui_kittest = { version = "0.37", features = ["snapshot", "wgpu"] }
+
+[lints]
+workspace = true

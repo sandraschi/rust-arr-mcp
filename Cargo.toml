@@ -1,0 +1,28 @@
+[workspace]
+members = [
+    "crates/arr-core",
+    "crates/arr-mcp",
+    "crates/arr-app",
+]
+resolver = "2"
+
+[workspace.lints.clippy]
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+unimplemented = "deny"
+todo = "deny"
+
+[workspace.dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+clap = { version = "4", features = ["derive"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "time"] }
+reqwest = { version = "0.12", features = ["json"] }
+chrono = "0.4"
+uuid = { version = "1", features = ["v5"] }
+rusqlite = { version = "0.40", features = ["bundled"] }
+keyring = "4"
+serde_yaml = "0.9"
+eframe = "0.37"
+egui_kittest = "0.37"

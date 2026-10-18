@@ -1,0 +1,20 @@
+[package]
+name = "rust-arr-mcp"
+version = "0.1.0"
+edition = "2021"
+description = "L2 CLI-first binary + MCP stdio server over arr-core (ArtCraft cadcraft pattern)"
+license = "MIT OR Apache-2.0"
+
+[[bin]]
+name = "rust-arr-mcp"
+path = "src/main.rs"
+
+[dependencies]
+arr-core = { path = "../arr-core" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+clap = { workspace = true }
+tokio = { workspace = true }
+
+[lints]
+workspace = true
