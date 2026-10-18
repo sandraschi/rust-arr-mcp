@@ -1,7 +1,7 @@
 # HANDOVER — `rust-arr-mcp`
 
-- **Being worked on:** Phase 2a done — op-table locked, `import.rs` green (repconv `arr-mcp` → `rust-arr-mcp`, Shadow-Then-Swap).
-- **Last concrete action (2026-10-18):** Phase 1 stamp (Checkpoint 1 green) + dossier §4-appendix (21 Literal sets) + `import.rs` (dotenv/expansion/resolution, 4 tests). Gates: clippy/test-6/fmt green.
-- **Next step:** Phase 2b `sonarr.rs` (series 7 ops + episodes 4 ops, `X-Api-Key` + timeout + cap + Demo) + `Command` wiring + live-read probe (real Sonarr if configured, else Demo fixtures).
+- **Being worked on:** Phase 2b done — `sonarr.rs` + command bus, 13 tests green (Shadow-Then-Swap).
+- **Last concrete action (2026-10-18):** Phase 2b `sonarr.rs` + `command.rs` + L2 wiring, 13 tests green. Live Sonarr reachable (empty library); tests pinned to Demo.
+- **Next step:** Phase 2c `radarr.rs` (8 ops, same pattern) or Phase 3 L2 `mcp` stdio — Sandra's call.
 - **Blockers:** None. Legacy `arr-mcp@3e907b6` clean; `rust-plex-mcp` hands-off (agy).
-- **Deliberately not done:** No service drivers yet (Phase 2b+), no L2 `mcp` stdio (Phase 3), no L3 dashboard (Phase 4), no `CHANGELOG.md` (added Phase 2 closeout).
+- **Deliberately not done:** Remaining 6 drivers (radarr/lidarr/readarr/bazarr/prowlarr/overseerr), L2 `mcp` stdio (Phase 3), L3 dashboard (Phase 4), `CHANGELOG.md` (Phase 2 closeout).
