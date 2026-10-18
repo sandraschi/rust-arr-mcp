@@ -61,3 +61,12 @@
 - Contract tests (5): catalog-82, unknown->err-not-panic, legacy-alias-equality (env-proof), round-trip, write-safety rejects.
 - Gates: clippy -D warnings green, cargo test 43 passed (38 + 5), fmt green.
 - Next: Phase 4 L3 egui dashboard (18 pages) or CHANGELOG + release v0.1.0.
+
+## 2026-10-18 - Phase 4: L3 egui dashboard, 19 pages (48 tests green)
+
+- app.rs (~1100 lines): 19 Page variants in 5 groups mirroring webapp/src/pages, mpsc Job bus + pending counter + repaint-while-pending, theme toggle, zoom (sampled/applied outside ctx.input), status line, per-service tables + lookup, health (bounded live reads), chat (OpenAI-compatible POST via runtime), settings (fleet LLM card + per-service vault-backed creds + pinned profiles), logs/inbox/help/tools/raw/inspector/orchestrate-router (no dead buttons - every button navigates, spawns, saves, or toggles).
+- main.rs/vault.rs/registry.rs mirrored from rust-calibre-mcp (SERVICE/paths renamed; icon loading dropped - no icons dir; registry holds name+URL pins, secrets in vault).
+- API migration (honest): eframe 0.37 removed update(ctx)+SidePanel/TopBottomPanel/CentralPanel(ctx) and Frame::none - ported to fn ui + Panel::top/left/bottom/central + Frame::NONE (same as calibre). Caught E0004/E0521/E0599 class errors via compiler.
+- Glyph hygiene: em-dash/arrow offenders replaced with ASCII (allowlist holds).
+- Gates: clippy -D warnings green, cargo test 48 passed (38 core + 5 mcp + 5 app incl. glyph scan + kittest), fmt green, --smoke OK (status + series/movies arrays).
+- Next: CHANGELOG.md + release v0.1.0, then cross-service compose (orchestrate/calendar/stats endpoints) as follow-up tiers.
