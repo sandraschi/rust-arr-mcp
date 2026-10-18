@@ -1,0 +1,12 @@
+# Rust ArtCraft — never commit these
+/target/
+**/target/
+*.bak
+*.bak.*
+.env
+*.exe
+*.pdb
+crash.log
+data/
+*.cache/
+.handover.tmp
