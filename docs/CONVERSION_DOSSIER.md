@@ -35,6 +35,30 @@
 
 Operation-literal table (every `operation="…"` variant per portmanteau) to be extracted from the running legacy server (`tools/list`) in Phase 1 and appended here before any L1 code — gate requirement, not skipped.
 
+### §4-appendix (2026-10-18, Phase 2 lock — code truth via `Literal[` grep, 21 sets, ~80 variants)
+
+- `arr_agentic`: workflow, natural_query
+- `bazarr_subtitles`: wanted, search, download, history, providers, languages
+- `arr_orchestrate`: request, status, check_jellyfin, check_plex, check_emby, queue
+- `arr_calendar`: upcoming, today, week, range
+- `arr_stats`: summary, disk, queues, history
+- `arr_health`: all, radarr, sonarr, lidarr, prowlarr, readarr, overseerr, bazarr
+- `arr_help`: discover, tool_info, quickstart
+- `lidarr_artists`: list, lookup, get, add, delete, update
+- `lidarr_albums`: list, get, lookup, set_monitored
+- `overseerr_requests`: list, get, create, approve, decline, delete, count, pending
+- `overseerr_search/users`: list, get, requests
+- `prowlarr_indexers`: list, get, add, update, delete, test, test_all, schema
+- `prowlarr_applications`: list, get, sync, sync_all, test
+- `prowlarr_history`: list, since, by_indexer
+- `radarr_movies`: list, lookup, get, add, search, delete, update, import
+- `readarr_authors`: list, lookup, get, add, delete, update
+- `readarr_books`: list, get, lookup, search, set_monitored (+ `MonitorMode`/`MonitorNewBooksMode` enums for mutations)
+- `sonarr_series`: list, lookup, get, add, search, delete, update
+- `sonarr_episodes`: list, get, search, set_monitored
+- Prefab cards (`arr_health_card/calendar_card/stats_card`): UI-only → `egui` panels, not MCP.
+- Phase 2 order: `import.rs` → `sonarr.rs` (7+4 ops) → radarr → lidarr/readarr → prowlarr/overseerr/bazarr → cross/health.
+
 ## 5. Credential / `.env` / config inventory (`import.rs` spec)
 
 From `.env.example` (values redacted, presence verified): `RADARR_URL/API_KEY/ENABLED`, `SONARR_*`, `LIDARR_*`, `PROWLARR_*`, `READARR_*`, `OVERSEERR_*(ENABLED=false)`. Resolution order: explicit args > process env > OS vault (`vault.rs`, `SERVICE="rust-arr-mcp"`) > imported `../arr-mcp/.env`. `import.rs` parses `${VAR:-default}` expansions; unit-tested fallback chain.

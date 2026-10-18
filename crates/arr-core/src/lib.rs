@@ -2,6 +2,7 @@
 //! Zero UI, zero MCP dependencies. Domain drivers land in Phase 2.
 
 pub mod error;
+pub mod import;
 
 use serde_json::Value;
 
