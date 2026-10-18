@@ -435,6 +435,91 @@ async fn vault_load_job() -> Job {
     }
 }
 
+/// Theme toggle: vector sun / crescent moon (glyphs would be tofu).
+/// Shows the sun in dark mode (offering light) and the moon in light mode.
+fn theme_toggle_button(ui: &mut egui::Ui, theme: &mut Theme) {
+    let size = egui::vec2(30.0, 30.0);
+    let (rect, resp) = ui.allocate_exact_size(size, egui::Sense::click());
+    if ui.is_rect_visible(rect) {
+        let visuals = ui.style().interact(&resp);
+        ui.painter().rect(
+            rect,
+            egui::CornerRadius::same(6),
+            visuals.bg_fill,
+            visuals.bg_stroke,
+            egui::StrokeKind::Inside,
+        );
+        let center = rect.center();
+        let painter = ui.painter();
+        if *theme == Theme::Dark {
+            let sun = egui::Color32::from_rgb(251, 191, 36);
+            painter.circle_filled(center, 4.5, sun);
+            let mut i = 0;
+            while i < 8 {
+                let angle = (i as f32) * std::f32::consts::TAU / 8.0;
+                let dir = egui::vec2(angle.cos(), angle.sin());
+                painter.line_segment(
+                    [center + dir * 6.5, center + dir * 9.2],
+                    egui::Stroke::new(1.6, sun),
+                );
+                i += 1;
+            }
+        } else {
+            let moon = egui::Color32::from_rgb(51, 65, 85);
+            painter.circle_filled(center, 6.5, moon);
+            painter.circle_filled(center + egui::vec2(3.0, -2.2), 5.5, visuals.bg_fill);
+        }
+    }
+    if resp.on_hover_text("Toggle light / dark theme").clicked() {
+        *theme = match *theme {
+            Theme::Dark => Theme::Light,
+            Theme::Light => Theme::Dark,
+        };
+        apply_theme(ui.ctx(), *theme);
+    }
+}
+
+/// Service hero: what the service is + standard usage (3 lines each).
+fn service_hero(service: &str) -> [&'static str; 3] {
+    match service {
+        "sonarr" => [
+            "Sonarr is a TV series PVR: it tracks shows, grabs missing episodes, and upgrades quality.",
+            "Standard flow: series_list, then series_lookup by title, then series_add with TVDB ID + quality profile + root folder.",
+            "series_search fetches a library series; files are never deleted unless delete_files is set.",
+        ],
+        "radarr" => [
+            "Radarr manages a movie collection: metadata, quality profiles, and automatic upgrades.",
+            "Standard flow: movies_list, then movies_lookup by title, then movie_add with TMDB ID + quality profile + root folder.",
+            "movie_search fetches a library movie; movies_import lists manual folder imports.",
+        ],
+        "lidarr" => [
+            "Lidarr manages music via MusicBrainz IDs: artists, albums, and monitored status.",
+            "Standard flow: artists_list, then artists_lookup by name, then artist_add with foreign (MusicBrainz) ID + profile + root.",
+            "Albums support list, get, lookup, and set_monitored - no downloader search at album level.",
+        ],
+        "readarr" => [
+            "Readarr manages ebooks and audiobooks: authors, editions, and monitored status.",
+            "Standard flow: authors_list, then authors_lookup, then author_add with foreign ID + profile + root folder.",
+            "Books support list, get, lookup, native search, and set_monitored; book_add/delete_many handle intake and pruning.",
+        ],
+        "bazarr" => [
+            "Bazarr is the subtitle companion: wanted lists, subtitle search, downloads, and history.",
+            "Standard flow: wanted (movies, episodes, or all), then search by media IDs, then download by subtitle ID.",
+            "providers and languages cover setup; history audits past downloads.",
+        ],
+        "prowlarr" => [
+            "Prowlarr manages Usenet and torrent indexers and syncs them to the media *arrs.",
+            "Standard flow: indexers_list, then unified search across all indexers, then application_sync to push to Sonarr/Radarr.",
+            "indexer_test/test_all plus schema cover setup; history tracks queries with since/by-indexer filters.",
+        ],
+        _ => [
+            "Overseerr handles media requests: users ask, approvers approve, the *arrs fulfill.",
+            "Standard flow: search media, then request_create (movie or tv), then approve or decline; count and pending track queues.",
+            "users_list, user_get, and user_requests show who asked for what.",
+        ],
+    }
+}
+
 fn count_items(val: &Value) -> String {
     if let Some(arr) = val.as_array() {
         return arr.len().to_string();
@@ -537,6 +622,7 @@ impl eframe::App for ArrApp {
                 ui.separator();
                 ui.label(&self.status_line);
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                    theme_toggle_button(ui, &mut self.theme);
                     if self.pending > 0 {
                         ui.label(format!("{} jobs…", self.pending));
                     } else {
@@ -689,6 +775,10 @@ impl ArrApp {
 
     fn view_service(&mut self, ui: &mut egui::Ui, service: &str, val: &Value, noun: &str) {
         let service = service.to_string();
+        for line in service_hero(service.as_str()) {
+            ui.label(RichText::new(line).size(12.5).color(Color32::GRAY));
+        }
+        ui.separator();
         ui.horizontal(|ui| {
             ui.label(format!("{} {} · {}", count_items(val), noun, service));
             if ui.button("Refresh").clicked() {
@@ -1197,6 +1287,39 @@ mod parity_tests {
         let mut harness = Harness::new_ui(|ui| {
             hero_kpi(ui, "Sonarr series", "2", ACCENT);
             value_table(ui, &json!([{"id": 42, "title": "Demo Series"}]), 50);
+        });
+        harness.run();
+    }
+
+    #[test]
+    fn service_heroes_cover_all_services() {
+        for service in [
+            "sonarr",
+            "radarr",
+            "lidarr",
+            "readarr",
+            "bazarr",
+            "prowlarr",
+            "overseerr",
+        ] {
+            let hero = service_hero(service);
+            assert_eq!(hero.len(), 3);
+            assert!(hero.iter().all(|line| !line.trim().is_empty()));
+        }
+        // Unknown services fall back to the Overseerr hero, never empty.
+        assert_eq!(service_hero("nope").len(), 3);
+    }
+
+    #[test]
+    fn theme_toggle_renders_both_modes() {
+        let mut theme = Theme::Dark;
+        let mut harness = Harness::new_ui(|ui| {
+            theme_toggle_button(ui, &mut theme);
+        });
+        harness.run();
+        let mut theme = Theme::Light;
+        let mut harness = Harness::new_ui(|ui| {
+            theme_toggle_button(ui, &mut theme);
         });
         harness.run();
     }

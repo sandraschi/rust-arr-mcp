@@ -70,3 +70,10 @@
 - Glyph hygiene: em-dash/arrow offenders replaced with ASCII (allowlist holds).
 - Gates: clippy -D warnings green, cargo test 48 passed (38 core + 5 mcp + 5 app incl. glyph scan + kittest), fmt green, --smoke OK (status + series/movies arrays).
 - Next: CHANGELOG.md + release v0.1.0, then cross-service compose (orchestrate/calendar/stats endpoints) as follow-up tiers.
+
+## 2026-10-18 - Post-release UX: service heroes + sun/moon toggle (50 tests green)
+
+- All 7 service pages render a 3-line hero (what the service is + standard flow + safety note) above the table.
+- Topbar sun/moon toggle mirrored from rust-devices-mcp (vector-drawn sun/crescent, zero glyphs, hover text, flips Theme + apply_theme).
+- Tests: service_heroes_cover_all_services (7 services x 3 non-empty lines + unknown fallback) + theme_toggle_renders_both_modes (kittest both states).
+- Gates: clippy -D warnings green, cargo test 50 passed (38 core + 5 mcp + 7 app), fmt green.
