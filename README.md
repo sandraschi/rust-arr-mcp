@@ -58,6 +58,7 @@ Once configured in Claude or your AI agent, you can ask natural-language questio
 |---|---|
 | [INSTALL.md](INSTALL.md) | All install paths (release, MCP-only, source) |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | 3-crate layout, data flow, protocols |
+| [docs/RUST.md](docs/RUST.md) | Rust toolchain, lints, gates, CI/CD, eframe notes |
 | [docs/CONFIGURATION.md](docs/CONFIGURATION.md) | Env vars, vault, import order |
 | [docs/TOOLS.md](docs/TOOLS.md) | Full 82-tool MCP reference |
 | [docs/WRAPPEE.md](docs/WRAPPEE.md) | The *arr projects, links, communities |

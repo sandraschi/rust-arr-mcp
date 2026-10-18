@@ -67,6 +67,13 @@ pub enum Theme {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum HelpTab {
+    Overview,
+    RustStack,
+    McpCli,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Page {
     // SERVICES
     Dashboard,
@@ -175,6 +182,7 @@ pub struct ArrApp {
     vault_loaded: bool,
     vault_status_note: String,
     pinned: crate::registry::Registry,
+    help_tab: HelpTab,
     event_logs: Vec<String>,
     log_filter: String,
 }
@@ -229,6 +237,7 @@ impl ArrApp {
             vault_loaded: false,
             vault_status_note: "Keyring: loading…".to_string(),
             pinned: crate::registry::Registry::default(),
+            help_tab: HelpTab::Overview,
             event_logs: vec!["[+0s] Arr Rust desktop app initialized.".to_string()],
             log_filter: String::new(),
         };
@@ -1006,10 +1015,50 @@ impl ArrApp {
     }
 
     fn view_help(&mut self, ui: &mut egui::Ui) {
-        ui.label("rust-arr-mcp - ArtCraft conversion of arr-mcp (Shadow-Then-Swap).");
-        ui.label("CLI: rust-arr-mcp <sonarr|radarr|lidarr|readarr|bazarr|prowlarr|overseerr> <op> --params-json '{}' [--json].");
-        ui.label("MCP: stdio 2024-11-05, 82 tools, dual aliases (dot + underscore + legacy).");
-        ui.label("Docs: docs/CONVERSION_DOSSIER.md (wire truth) + HANDOVER.md (live state).");
+        ui.horizontal(|ui| {
+            for (tab, label) in [
+                (HelpTab::Overview, "Overview"),
+                (HelpTab::RustStack, "Rust stack"),
+                (HelpTab::McpCli, "MCP + CLI"),
+            ] {
+                if ui
+                    .selectable_value(&mut self.help_tab, tab, label)
+                    .clicked()
+                {}
+            }
+        });
+        ui.separator();
+        match self.help_tab {
+            HelpTab::Overview => {
+                ui.label("rust-arr-mcp - ArtCraft conversion of arr-mcp (Shadow-Then-Swap).");
+                ui.label("7 services · 80 commands · 82 MCP tools · 19 dashboard pages.");
+                ui.label(
+                    "Docs: docs/CONVERSION_DOSSIER.md (wire truth) + HANDOVER.md (live state).",
+                );
+                ui.label("Every destructive action needs explicit flags; reads are default.");
+            }
+            HelpTab::RustStack => {
+                ui.label("Toolchain: stable Rust via rustup, Edition 2021 (no let-chains).");
+                ui.label("Workspace: arr-core (L1 drivers) + rust-arr-mcp (L2 CLI/MCP) + arr-app (L3 egui).");
+                ui.label("Gates: clippy -D warnings (incl. tests) · cargo test · cargo fmt --check · --smoke.");
+                ui.label(
+                    "Deny list: unwrap / expect / panic / todo - typed ArrError + ? everywhere.",
+                );
+                ui.label(
+                    "HTTP: reqwest + X-Api-Key, 30 s timeout, 32 MiB cap, Demo fallback offline.",
+                );
+                ui.label("L3: eframe 0.37 (fn ui + Panel::*, Frame::NONE), mpsc jobs, vault-backed keys.");
+                ui.label("Full detail: docs/RUST.md.");
+            }
+            HelpTab::McpCli => {
+                ui.label("MCP: stdio 2024-11-05, stdout is pure JSON-RPC, logs on stderr.");
+                ui.label("Names: sonarr.series_list = sonarr_series_list = sonarr_series(operation=list).");
+                ui.label("CLI: rust-arr-mcp <service> <op> --params-json '{}' [--json] · status · health [--probe] · mcp.");
+                ui.label(
+                    "Resolution: flags > env (SONARR_URL/...) > vault > sibling arr-mcp > Demo.",
+                );
+            }
+        }
     }
 
     fn view_raw(&mut self, ui: &mut egui::Ui) {

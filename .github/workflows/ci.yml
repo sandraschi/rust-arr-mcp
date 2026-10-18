@@ -1,0 +1,39 @@
+name: ci
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+# Rust track: clippy + test + fmt + smoke only.
+# No ruff / biome / pytest / tsc here — those belong to the Python/FastMCP
+# track (see mcp-central-docs/standards/AGENT_PROTOCOLS.md). Release builds
+# (`cargo build --release`, ~2 min eframe) stay manual via `just build-release`
+# and ride GitHub releases, not per-push CI.
+
+jobs:
+  gates:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install stable Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - name: Lint gate (deny unwrap/expect/panic/todo)
+        run: cargo clippy --workspace --all-targets --all-features -- -D warnings
+
+      - name: Unit + integration tests
+        run: cargo test --workspace
+
+      - name: Format gate
+        run: cargo fmt --all --check
+
+      - name: Headless L3 smoke (no window, CI-safe)
+        run: cargo run -p arr-app -- --smoke
