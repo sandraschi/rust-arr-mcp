@@ -2,6 +2,26 @@
 
 All notable changes to `rust-arr-mcp` are documented in this file.
 
+## [0.1.1] - 2026-10-18
+
+Patch: release stack, CI, L3 help/UX polish. No wire changes, no new tools.
+
+### Added
+
+- Rust CI (`.github/workflows/ci.yml`, Windows-only: clippy, test, fmt, smoke —
+  no ruff/biome/pytest), `just ci` (+ `clippy`/`fmt`/`smoke` recipes; justfile
+  de-plexed — it invoked `rust-plex-mcp` binaries), `docs/RUST.md` (toolchain,
+  deny gate, eframe 0.37 notes, release flow).
+- L3 Help page tabs: Overview / Rust stack / MCP + CLI.
+- Service heroes on all 7 pages (3 lines: what + standard flow + safety).
+- Topbar sun/moon toggle (vector-drawn, zero glyphs, mirrored from
+  `rust-devices-mcp`).
+
+### Fixed
+
+- `disable_help_subcommand`: clap's auto-`help` collided with our Help page
+  variant (forensic hook caught it live in-probe).
+
 ## [0.1.0] - 2026-10-18
 
 Initial ArtCraft conversion of `arr-mcp` (`master@3e907b6`) under the `repconv`

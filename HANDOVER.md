@@ -1,6 +1,6 @@
 # HANDOVER — `rust-arr-mcp`
 
-- **Being worked on:** Post-v0.1.0 UX — service heroes + sun/moon toggle, 50 tests green (Shadow-Then-Swap).
+- **Being worked on:** v0.1.1 patch release (CI/RUST.md/Help/heroes/toggle).
 - **Last concrete action (2026-10-18):** v0.1.0 released on GitHub (public, 2 exe assets) + Rust CI/RUST.md/Help-tab + heroes/toggle. 50 tests green.
 - **Next step:** Cross-service compose tiers / live verify / NSIS — Sandra's call. (`stripe-mcp` case briefed, queued after arr.)
 - **Blockers:** None. Legacy `arr-mcp@3e907b6` clean; `rust-plex-mcp` hands-off (agy).
